@@ -1,0 +1,9 @@
+# Global exclusions: for all folders
+.DS_Store
+*.orig
+.idea/
+
+node_modules/
+
+# Generated binaries
+bin/
