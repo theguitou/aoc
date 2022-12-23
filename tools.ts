@@ -61,6 +61,116 @@ export function quickSort(items, left, right)
 	return items;
 }
 
+export class SuperSet<T> {
+	private internal = new Set<string>();
+
+	public add(value: T): this
+	{
+		this.internal.add(JSON.stringify(value));
+		return this;
+	}
+
+	public clear(): void
+	{
+		this.internal.clear();
+	}
+
+	public delete(value: T): boolean
+	{
+		return this.internal.delete(JSON.stringify(value));
+	}
+
+	public forEach(callbackfn: (value: T, value2: T, set: SuperSet<T>) => void, thisArg?: any): void
+	{
+		this.internal.forEach((value, value2) => {
+			callbackfn.call(thisArg, JSON.parse(value), JSON.parse(value2), this);
+		})
+	}
+
+	public has(value: T): boolean
+	{
+		return this.internal.has(JSON.stringify(value));
+	}
+
+	public get size(): number
+	{
+		return this.internal.size;
+	}
+
+	public [Symbol.iterator]()
+	{
+		const values = this.internal.values();
+		return {
+			next()
+			{
+				const next = values.next();
+				if (!next.done) {
+					return { value: JSON.parse(next.value), done: false };
+				}
+				return { value: undefined, done: true };
+			}
+		};
+	}
+}
+
+export class SuperMap<K, V>
+{
+	private internal = new Map<string, V>();
+
+	public clear(): void
+	{
+		this.internal.clear();
+	}
+
+	public delete(key: K): boolean
+	{
+		return this.internal.delete(JSON.stringify(key));
+	}
+
+	public forEach(callbackfn: (value: V, key: K, map: SuperMap<K, V>) => void, thisArg?: any): void
+	{
+		this.internal.forEach((value, key) => {
+			callbackfn.call(thisArg, value, JSON.parse(key), this);
+		})
+	}
+
+	public get(key: K): V | undefined
+	{
+		return this.internal.get(JSON.stringify(key));
+	}
+
+	public has(key: K): boolean
+	{
+		return this.internal.has(JSON.stringify(key));
+	}
+
+	public set(key: K, value: V): this
+	{
+		this.internal.set(JSON.stringify(key), value);
+		return this;
+	}
+
+	public get size(): number
+	{
+		return this.internal.size;
+	}
+
+	public [Symbol.iterator]()
+	{
+		const entries = this.internal.entries();
+		return {
+			next()
+			{
+				const next = entries.next();
+				if (!next.done) {
+					return { value: [JSON.parse(next.value[0]), next.value[1]], done: false };
+				}
+				return { value: undefined, done: true };
+			}
+		};
+	}
+}
+
 
 // function sortNFirst(list: any[], n: number, comparison?: (a: any, b: any) => number)
 // {
