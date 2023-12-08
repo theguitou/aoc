@@ -11,6 +11,22 @@ export function getRandomInt(min: number, max: number): number
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+export function ppcm(x: number, y: number)
+{
+	return x * y / pgcd(x, y)
+}
+
+export function pgcd(x: number, y: number)
+{
+	while (y !== 0)
+	{
+		let temp = y;
+		y = x % y;
+		x = temp;
+	}
+	return x;
+}
+
 export function swap(items, leftIndex, rightIndex)
 {
 	var temp = items[leftIndex];
