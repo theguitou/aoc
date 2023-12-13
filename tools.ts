@@ -218,3 +218,24 @@ export class SuperMap<K, V>
 
 // 	quickSort(list, 0, lastNSorted);
 // }
+
+export type MemoizeFunction<T extends Function> = T & {
+	reset: () => void;
+}
+export function memoize<T extends Function>(fct: T, keyParams: number[]): MemoizeFunction<T>
+{
+	const mem = new Map<string, any>();
+	const memoizeFct: any = (...params) =>
+	{
+		const memkey = JSON.stringify(keyParams.map(n => params[n]));
+		if (mem.has(memkey))
+		{
+			return mem.get(memkey);
+		}
+		const ret = fct(...params);
+		mem.set(memkey, ret);
+		return ret;
+	};
+	memoizeFct.reset = () => mem.clear();
+	return memoizeFct;
+}

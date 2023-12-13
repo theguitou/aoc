@@ -1,31 +1,17 @@
 import * as fs from "fs";
+import { memoize } from "./tools";
 
 let input = fs.readFileSync('./input.txt', {encoding:'utf8', flag:'r'});
 //let input = fs.readFileSync('./input_test.txt', {encoding:'utf8', flag:'r'});
 
-function memoizer<T>(mem: Map<string, T>, memkey: string): ((ret: T) => T)
-{
-	return (ret) => {
-		mem.set(memkey, ret);
-		return ret;
-	};
-}
-
 type ComputeResult = { count: number, tryNextChar?: boolean };
-function compute(nums: number[], i: number, chars: string[], mem: Map<string, ComputeResult>): ComputeResult
+const compute = memoize(function(nums: number[], i: number, chars: string[]): ComputeResult
 {
-	const memkey = JSON.stringify([nums,i]);
-	if (mem.has(memkey))
-	{
-		return mem.get(memkey);
-	}
-	const memoize = memoizer(mem, memkey);
-
 	nums = nums.slice();
 	const num = nums.shift();
 	if (chars.length < num)
 	{
-		return memoize({ count: 0 });
+		return { count: 0 };
 	}
 	let istart = null;
 	let tryNextChar = null;
@@ -57,7 +43,7 @@ function compute(nums: number[], i: number, chars: string[], mem: Map<string, Co
 		{
 			if (nbChar !== 0 && thisGroup)
 			{
-				return memoize({ count: 0 });
+				return { count: 0 };
 			}
 			istart = null;
 			nbChar = 0;
@@ -66,7 +52,7 @@ function compute(nums: number[], i: number, chars: string[], mem: Map<string, Co
 		{
 			if (chars[j+1] === "#" && !tryNextChar)
 			{
-				return memoize({ count: 0 });
+				return { count: 0 };
 			}
 			const ret: ComputeResult = { count: 0, tryNextChar };
 			if (chars[j+1] !== "#")
@@ -79,26 +65,26 @@ function compute(nums: number[], i: number, chars: string[], mem: Map<string, Co
 					}
 					else if (!tryNextChar)
 					{
-						return memoize({ count: 0 });
+						return { count: 0 };
 					}
 				}
 				else
 				{
-					const subRet = compute(nums.slice(), j+2, chars, mem);
+					const subRet = compute(nums.slice(), j+2, chars);
 					ret.count += subRet.count;
 				}
 			}
 			while (ret.tryNextChar)
 			{
-				const nextCharRet = compute([num].concat(nums), ++istart, chars, mem);
+				const nextCharRet = compute([num].concat(nums), ++istart, chars);
 				ret.count += nextCharRet.count;
 				ret.tryNextChar = nextCharRet.tryNextChar && nextCharRet.count !== 0;
 			}
-			return memoize(ret);
+			return ret;
 		}
 	}
-	return memoize({ count: 0 });
-}
+	return { count: 0 };
+}, [0,1]);
 
 for (const len of [1, 5])
 {
@@ -108,8 +94,8 @@ for (const len of [1, 5])
 		const parts = line.split(" ");
 		const chars = new Array(len).fill(parts[0]).join("?").split("");
 		const nums = new Array(len).fill(parts[1]).join(",").split(",").map(n => +n);
-		const mem = new Map<string, ComputeResult>();
-		const ret = compute(nums.slice(), 0, chars, mem);
+		compute.reset();
+		const ret = compute(nums.slice(), 0, chars);
 		sum += ret.count;
 	}
 	console.log(sum);
