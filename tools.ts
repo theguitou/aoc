@@ -222,7 +222,7 @@ export class SuperMap<K, V>
 export type MemoizeFunction<T extends Function> = T & {
 	reset: () => void;
 }
-export function memoize<T extends Function>(fct: T, keyParams: number[]): MemoizeFunction<T>
+export function memoize<T extends Function>(fct: T, keyParams: number[], debug: boolean = false): MemoizeFunction<T>
 {
 	const mem = new Map<string, any>();
 	const memoizeFct: any = (...params) =>
@@ -230,12 +230,115 @@ export function memoize<T extends Function>(fct: T, keyParams: number[]): Memoiz
 		const memkey = JSON.stringify(keyParams.map(n => params[n]));
 		if (mem.has(memkey))
 		{
-			return mem.get(memkey);
+			const memRet = mem.get(memkey);
+			if (debug)
+			{
+				console.log(`memoize hit: ${memRet.i}`);
+			}
+			return memRet.ret;
 		}
 		const ret = fct(...params);
-		mem.set(memkey, ret);
+		mem.set(memkey, { i: mem.size, ret });
 		return ret;
 	};
 	memoizeFct.reset = () => mem.clear();
 	return memoizeFct;
+}
+
+export function extend(dst: any, ...sources: any[]): any
+{
+	return extendEx(dst, ...sources.concat({}));
+}
+
+export function extendEx(dst: any, ...sourcesAndOptions: any[])
+{
+	if (dst)
+	{
+		const sources = sourcesAndOptions.slice(); // clone array
+		const options = sources.pop();
+		sources.forEach((obj) =>
+		{
+			if (!isObject(obj) && !isFunction(obj))
+			{
+				return;
+			}
+			for (const key in obj)
+			{
+				const src = obj[key];
+				if (isObject(src))
+				{
+					if (isDate(src))
+					{
+						dst[key] = new Date(src.valueOf());
+					}
+					else
+					{
+						if (isArray(src) && options.mergeArray === false)
+						{
+							dst[key] = [];
+						}
+						else if (!isObject(dst[key]))
+						{
+							dst[key] = isArray(src) ? [] : {};
+						}
+						extend(dst[key], src);
+					}
+				}
+				else
+				{
+					dst[key] = src;
+				}
+			}
+		});
+	}
+	return dst;
+}
+
+export type JsType = "String" | "Date" | "Number" | "Boolean" | "Json" | "File" | "Function" | "Array" |
+	"RegExp" | "Object" | "FormData" | "Blob" | "Unknown";
+
+const class2type: Record<string, JsType> = {
+	"[object Boolean]": "Boolean",
+	"[object Number]": "Number",
+	"[object String]": "String",
+	"[object Function]": "Function",
+	"[object CallbackFunction]": "Function",
+	"[object Array]": "Array",
+	"[object Date]": "Date",
+	"[object RegExp]": "RegExp",
+	"[object File]": "File",
+	"[object Object]": "Object",
+	"[object FormData]": "FormData",
+	"[object Blob]": "Blob"
+};
+const toString = Object.prototype.toString;
+
+export function getJsType(v: any): JsType
+{
+	return v == null ? "Unknown" : class2type[toString.call(v)] || "Object";
+}
+
+export function isFunction(v: any): boolean
+{
+	return getJsType(v) === "Function";
+}
+
+export function isArray<T>(v: any): v is Array<T>
+{
+	return getJsType(v) === "Array";
+}
+
+export function isDate(v: any): v is Date
+{
+	return getJsType(v) === "Date";
+}
+
+export function isNumber(v: any): v is number
+{
+	return getJsType(v) === "Number";
+}
+
+export function isObject(v: any): v is Object
+{
+	return v !== null && typeof v === "object";
 }
