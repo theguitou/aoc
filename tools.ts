@@ -98,7 +98,8 @@ export class SuperSet<T> {
 
 	public forEach(callbackfn: (value: T, value2: T, set: SuperSet<T>) => void, thisArg?: any): void
 	{
-		this.internal.forEach((value, value2) => {
+		this.internal.forEach((value, value2) =>
+		{
 			callbackfn.call(thisArg, JSON.parse(value), JSON.parse(value2), this);
 		})
 	}
@@ -120,7 +121,8 @@ export class SuperSet<T> {
 			next()
 			{
 				const next = values.next();
-				if (!next.done) {
+				if (!next.done)
+				{
 					return { value: JSON.parse(next.value), done: false };
 				}
 				return { value: undefined, done: true };
@@ -145,7 +147,8 @@ export class SuperMap<K, V>
 
 	public forEach(callbackfn: (value: V, key: K, map: SuperMap<K, V>) => void, thisArg?: any): void
 	{
-		this.internal.forEach((value, key) => {
+		this.internal.forEach((value, key) =>
+		{
 			callbackfn.call(thisArg, value, JSON.parse(key), this);
 		})
 	}
@@ -178,13 +181,46 @@ export class SuperMap<K, V>
 			next()
 			{
 				const next = entries.next();
-				if (!next.done) {
+				if (!next.done)
+				{
 					return { value: [JSON.parse(next.value[0]), next.value[1]], done: false };
 				}
 				return { value: undefined, done: true };
 			}
 		};
 	}
+}
+
+export function binarySearch(arr: any[], element: any, predicate?: (a,b) => number, start?: number, end?: number)
+{
+	if (start === undefined) start = 0;
+	if (end === undefined) end = arr.length - 1;
+	predicate = predicate || ((a,b) => a - b);
+	while (start <= end)
+	{
+		const mid = Math.floor((start + end) / 2);
+		const cmp = predicate(arr[mid], element);
+		if (cmp === 0)
+		{
+			return mid;
+		}
+		else if (cmp < 0)
+		{
+			start = mid + 1;
+		}
+		else
+		{
+			end = mid - 1;
+		}
+	}
+	return start;
+}
+
+export function insertInSortedArray(arr: any[], element: any, predicate?: (a,b) => number)
+{
+	const index = binarySearch(arr, element, predicate);
+	arr.splice(index, 0, element);
+	return arr;
 }
 
 
@@ -238,7 +274,10 @@ export function memoize<T extends Function>(fct: T, keyParams: number[], debug: 
 			return memRet.ret;
 		}
 		const ret = fct(...params);
-		mem.set(memkey, { i: mem.size, ret });
+		if (ret !== null)
+		{
+			mem.set(memkey, { i: mem.size, ret });
+		}
 		return ret;
 	};
 	memoizeFct.reset = () => mem.clear();
@@ -270,6 +309,10 @@ export function extendEx(dst: any, ...sourcesAndOptions: any[])
 					if (isDate(src))
 					{
 						dst[key] = new Date(src.valueOf());
+					}
+					else if (src instanceof Set)
+					{
+						dst[key] = new Set(src);
 					}
 					else
 					{
