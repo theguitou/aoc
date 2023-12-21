@@ -16,6 +16,11 @@ export function ppcm(x: number, y: number)
 	return x * y / pgcd(x, y)
 }
 
+export function ppcmx(...numbers: number[])
+{
+	return numbers.reduce((r, n) => ppcm(r, n), 1);
+}
+
 export function pgcd(x: number, y: number)
 {
 	while (y !== 0)
@@ -25,6 +30,11 @@ export function pgcd(x: number, y: number)
 		x = temp;
 	}
 	return x;
+}
+
+export function pgcdx(...numbers: number[])
+{
+	return numbers.reduce((r, n) => pgcd(r, n), numbers[0]);
 }
 
 export function swap(items, leftIndex, rightIndex)
