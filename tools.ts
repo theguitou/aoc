@@ -11,32 +11,6 @@ export function getRandomInt(min: number, max: number): number
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function ppcm(x: number, y: number)
-{
-	return x * y / pgcd(x, y)
-}
-
-export function ppcmx(...numbers: number[])
-{
-	return numbers.reduce((r, n) => ppcm(r, n), 1);
-}
-
-export function pgcd(x: number, y: number)
-{
-	while (y !== 0)
-	{
-		let temp = y;
-		y = x % y;
-		x = temp;
-	}
-	return x;
-}
-
-export function pgcdx(...numbers: number[])
-{
-	return numbers.reduce((r, n) => pgcd(r, n), numbers[0]);
-}
-
 export function swap(items, leftIndex, rightIndex)
 {
 	var temp = items[leftIndex];
@@ -232,38 +206,6 @@ export function insertInSortedArray(arr: any[], element: any, predicate?: (a,b) 
 	arr.splice(index, 0, element);
 	return arr;
 }
-
-
-// function sortNFirst(list: any[], n: number, comparison?: (a: any, b: any) => number)
-// {
-// 	comparison = comparison || ((a, b) => a - b);
-
-// 	let lastNSorted = 0;
-// 	let maxOfNSorted = null;
-// 	let len = list.length - 1;
-// 	for (let i = 0; i < len; i++)
-// 	{
-// 		let a = list[lastNSorted];
-// 		let b = list[i + 1];
-// 		let cmp = comparison(a, b);
-// 		if (cmp > 0)
-// 		{
-// 			list[lastNSorted] = b;
-// 			list[i + 1] = a;
-// 		}
-
-// 		if ((lastNSorted + 1) < n)
-// 		{
-// 			lastNSorted++;
-// 			if (comparison(maxOfNSorted, list[lastNSorted]) < 0)
-// 			{
-// 				maxOfNSorted = 
-// 			}
-// 		}
-// 	}
-
-// 	quickSort(list, 0, lastNSorted);
-// }
 
 export type MemoizeFunction<T extends Function> = T & {
 	reset: () => void;
