@@ -64,6 +64,16 @@ export function quickSort(items, left, right)
 export class SuperSet<T> {
 	private internal = new Set<string>();
 
+	public clone(): SuperSet<T>
+	{
+		const clone = new SuperSet<T>();
+		for (const key of this)
+		{
+			clone.add(key);
+		}
+		return clone;
+	}
+
 	public add(value: T): this
 	{
 		this.internal.add(JSON.stringify(value));
@@ -119,6 +129,28 @@ export class SuperMap<K, V>
 {
 	private internal = new Map<string, V>();
 
+	public clone(): SuperMap<K, V>
+	{
+		const clone = new SuperMap<K, V>();
+		for (let [key, value] of this)
+		{
+			if (isFunction(value.clone))
+			{
+				value = value.clone();
+			}
+			else if (isArray(value))
+			{
+				value = extend([], value);
+			}
+			else if (isPlainObject(value))
+			{
+				value = extend({}, value);
+			}
+			clone.set(key, value);
+		}
+		return clone;
+	}
+
 	public clear(): void
 	{
 		this.internal.clear();
@@ -156,6 +188,11 @@ export class SuperMap<K, V>
 	public get size(): number
 	{
 		return this.internal.size;
+	}
+
+	public keys(): K[]
+	{
+		return [...this.internal.keys()].map(k => JSON.parse(k));
 	}
 
 	public [Symbol.iterator]()
@@ -336,4 +373,28 @@ export function isNumber(v: any): v is number
 export function isObject(v: any): v is Object
 {
 	return v !== null && typeof v === "object";
+}
+
+export const hasOwn = Object.prototype.hasOwnProperty;
+
+export function isPlainObject(obj: any): obj is Record<string, any>
+{
+	if (!obj || typeof obj !== "object" || obj.nodeType)
+	{
+		return false;
+	}
+	try
+	{
+		if (obj.constructor && !hasOwn.call(obj, "constructor") && !hasOwn.call(obj.constructor.prototype, "isPrototypeOf"))
+		{
+			return false;
+		}
+	}
+	catch (e)
+	{
+		return false;
+	}
+	let key;
+	for (key in obj) {}
+	return key === undefined || hasOwn.call(obj, key);
 }
