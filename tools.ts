@@ -212,6 +212,83 @@ export class SuperMap<K, V>
 	}
 }
 
+export function size(obj: any)
+{
+	if (obj)
+	{
+		if (isDefined(obj.length))
+		{
+			return obj.length;
+		}
+		if (isFunction(obj.size))
+		{
+			return obj.size();
+		}
+		if (isPlainObject(obj))
+		{
+			let count = 0;
+			for (const _ of enumerate(obj))
+			{
+				count++;
+			}
+			return count;
+		}
+	}
+	return 0;
+}
+
+class Enumeration
+{
+	constructor(public obj: Record<string, any>)
+	{
+		this.obj = obj;
+	}
+	*[Symbol.iterator]()
+	{
+		for (const key in this.obj)
+		{
+			if (hasOwn.call(this.obj, key))
+			{
+				yield [key,this.obj[key]];
+			}
+		}
+	}
+}
+//export const enumerate = (obj) => new Enumeration(obj);
+export const enumerate = (...args) => new (Function.prototype.bind.apply(Enumeration, [null].concat(args)))();
+
+class Range
+{
+	private array: any[];
+	private start: number;
+	private end: number;
+	private step: number;
+
+	constructor(start: number, end: number, step: number);
+	constructor(array: any[], start: number, end: number, step: number);
+	constructor(...args: any[])
+	{
+		let startArgIdx = 0;
+		if (isArray(args[0]))
+		{
+			this.array = args[0];
+			startArgIdx = 1;
+		}
+		this.start = args[startArgIdx];
+		this.end = args[startArgIdx+1];
+		this.step = args[startArgIdx+2] || 1;
+	}
+
+	*[Symbol.iterator]()
+	{
+		for (let i = this.start; i < this.end; i += this.step)
+		{
+			yield (this.array ? this.array[i] : i);
+		}
+	}
+}
+export const range = (...args) => new (Function.prototype.bind.apply(Range, [null].concat(args)))();
+
 export function binarySearch(arr: any[], element: any, predicate?: (a,b) => number, start?: number, end?: number)
 {
 	if (start === undefined) start = 0;
@@ -348,6 +425,16 @@ const toString = Object.prototype.toString;
 export function getJsType(v: any): JsType
 {
 	return v == null ? "Unknown" : class2type[toString.call(v)] || "Object";
+}
+
+export function isDefined(v: any): boolean
+{
+	return typeof v !== "undefined";
+}
+
+export function isUndefined(v: any): boolean
+{
+	return typeof v === "undefined";
 }
 
 export function isFunction(v: any): boolean
