@@ -276,12 +276,12 @@ class Range
 		}
 		this.start = args[startArgIdx];
 		this.end = args[startArgIdx+1];
-		this.step = args[startArgIdx+2] || 1;
+		this.step = args[startArgIdx+2] || (this.start <= this.end ? 1 : -1);
 	}
 
 	*[Symbol.iterator]()
 	{
-		for (let i = this.start; i < this.end; i += this.step)
+		for (let i = this.start; this.step > 0 ? i < this.end : i > this.end; i += this.step)
 		{
 			yield (this.array ? this.array[i] : i);
 		}
