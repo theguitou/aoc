@@ -245,11 +245,12 @@ class Enumeration
 	}
 	*[Symbol.iterator]()
 	{
+		const anArray = isArray(this.obj);
 		for (const key in this.obj)
 		{
 			if (hasOwn.call(this.obj, key))
 			{
-				yield [key,this.obj[key]];
+				yield [anArray ? +key : key,this.obj[key]];
 			}
 		}
 	}
